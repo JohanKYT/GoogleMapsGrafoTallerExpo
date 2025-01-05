@@ -16,23 +16,23 @@ public class GrafoPanel extends JPanel {
     public GrafoPanel(Grafo grafo) {
         this.grafo = grafo;
 
-        // Agregar un MouseWheelListener para manejar el zoom
+        // Agregar una funcion MouseWheelListener para usar zoom
         addMouseWheelListener(new MouseAdapter() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                // Detectar si la rueda se movió hacia arriba (acercar) o hacia abajo (alejar)
+                // Detectar si la rueda se movió
                 if (e.getWheelRotation() < 0) {
-                    // Acercar (zoom in)
+                    // Hacia arriba (acercar)
                     zoomFactor += ZOOM_STEP;
                 } else {
-                    // Alejar (zoom out)
+                    // Hacia abajo (alejar)
                     zoomFactor = Math.max(0.1, zoomFactor - ZOOM_STEP); // Evitar que el zoom sea demasiado pequeño
                 }
-                repaint(); // Redibujar el grafo con el nuevo zoom
+                repaint(); // Redibujar el grafo
             }
         });
 
-        // Agregar un MouseListener y MouseMotionListener para manejar el desplazamiento con clic izquierdo
+        // Agregar una funcion MouseListener y MouseMotionListener mover con clic izquierdo
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -58,7 +58,7 @@ public class GrafoPanel extends JPanel {
             public void mouseDragged(MouseEvent e) {
                 // Solo mover el grafo si el botón izquierdo está presionado
                 if (isDragging) {
-                    // Calcular el desplazamiento en X y Y
+                    // Calcular X y Y
                     int deltaX = e.getX() - prevMouseX;
                     int deltaY = e.getY() - prevMouseY;
 
@@ -81,28 +81,27 @@ public class GrafoPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-
-        // Configuración inicial
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(2));
 
         // Trasladar el origen al centro del panel y aplicar el desplazamiento
         int width = getWidth();
         int height = getHeight();
-        //Desplazar el grafo segun el offset
+        // Desplazar el grafo según el offset
         g2d.translate(width / 2 + offsetX, height / 2 + offsetY);
-        // Aplicar el zoom: Escalar el gráfico
-        g2d.scale(zoomFactor, zoomFactor); // Escalar el contenido del grafo
+        // Aplicar el zoom: Escalar el gráfico ademas, del contenido
+        g2d.scale(zoomFactor, zoomFactor);
 
-        // Dibujar las aristas
+        // Aristas
         int[][] adjMatrix = grafo.getMatrizAdyacencia();
         ArrayList<Vertice> vertices = grafo.getVertices();
 
-        // Ajustar el tamaño de la fuente para reducir el tamaño de las etiquetas al hacer zoom
+        // Ajustar el tamaño de la fuente para reducir el tamaño de los nombres al hacer zoom
         Font originalFont = g2d.getFont();
         Font scaledFont = originalFont.deriveFont((float) (originalFont.getSize() / zoomFactor)); // Reducir el tamaño de la fuente
         g2d.setFont(scaledFont);
 
+        // Dibujar las aristas
         for (int i = 0; i < grafo.getContarVertice(); i++) {
             for (int j = i + 1; j < grafo.getContarVertice(); j++) {
                 if (adjMatrix[i][j] != Integer.MAX_VALUE) {
@@ -110,41 +109,36 @@ public class GrafoPanel extends JPanel {
                     Vertice v2 = vertices.get(j);
 
                     // Dibujar la arista
-                    g2d.drawLine(v1.x, v1.y, v2.x, v2.y);
+                    g2d.drawLine((int)(v1.x * zoomFactor), (int)(v1.y * zoomFactor), (int)(v2.x * zoomFactor), (int)(v2.y * zoomFactor));
 
-                    // Dibujar la ponderación en el punto medio
-                    int midX = (v1.x + v2.x) / 2;
-                    int midY = (v1.y + v2.y) / 2;
+                    // Mostrar la ponderación en el punto medio de la arista, ajustada segun el zoom
+                    int midX = (int) (((v1.x + v2.x) / 2.0) * zoomFactor);
+                    int midY = (int) (((v1.y + v2.y) / 2.0) * zoomFactor);
                     g2d.drawString(String.valueOf(adjMatrix[i][j]), midX, midY);
                 }
             }
         }
 
-        // Dibujar los vértices y sus etiquetas
+        // Dibujar los vértices y sus etiquetas o nombres si se agrego uno
         for (Vertice vertice : vertices) {
             int x = vertice.x;
             int y = vertice.y;
 
-            // Dibujar el vértice, considerando el zoom
-            g2d.fillOval(x - 5, y - 5, 10, 10);
+            // Escalar las posiciones de los vértices
+            int minVertexSize = 5; // Tamaño mínimo de vértice
+            // Asegurarse de que no sea más pequeño que minVertexSize
+            int vertexSize = Math.max((int) (10 / zoomFactor), minVertexSize); // Asegurarse de que no sea más pequeño que minVertexSize
 
-            // Dibujar la etiqueta del vértice, con la posición ajustada según el zoom
-            g2d.drawString(vertice.etiqueta, x + 10, y);
+            // Dibujar el vértice, considerando el zoom
+            g2d.fillOval((int)(x * zoomFactor) - vertexSize / 2, (int)(y * zoomFactor) - vertexSize / 2, vertexSize, vertexSize);
+
+            // Mostrar la etiqueta o el nombre del vértice en proporcion al zoom
+            g2d.drawString(vertice.etiqueta, (int)(x * zoomFactor) + vertexSize, (int)(y * zoomFactor));
         }
 
         // Restaurar la fuente original después de dibujar
         g2d.setFont(originalFont);
     }
 
-    // Metodo para obtener el zoom actual
-    public double getZoomFactor() {
-        return zoomFactor;
-    }
-
-    // Metodo para ajustar el zoom programáticamente (si se quiere agregar un botón para zoom)
-    public void setZoomFactor(double zoomFactor) {
-        this.zoomFactor = zoomFactor;
-        repaint();
-    }
 }
 

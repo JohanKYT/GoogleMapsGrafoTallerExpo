@@ -79,7 +79,7 @@ public class GrafoGoogleMapsGUI {
             public void actionPerformed(ActionEvent e) {
                 // Crear el panel del grafo y añadirlo al panel pGrafo
                 GrafoPanel nuevoGrafoPanel = new GrafoPanel(grafo); // Crear un nuevo panel para el grafo
-                pGrafo.removeAll(); // Eliminar cualquier componente existente en pGrafo
+                pGrafo.removeAll(); // Eliminar cualquier componente
                 pGrafo.setLayout(new BorderLayout()); // Usar un layout adecuado (como BorderLayout)
                 pGrafo.add(nuevoGrafoPanel, BorderLayout.CENTER); // Agregar el GrafoPanel
                 pGrafo.revalidate(); // Asegurarse de que el contenedor se actualice
