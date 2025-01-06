@@ -22,6 +22,7 @@ public class GrafoGoogleMapsGUI {
     private JTextField textPonderacion;
     private JTextField textNombre;
     private JScrollPane JScroll_txtResultado;
+    private JButton abrirTablaButton;
 
     private DefaultTableModel modeloTabla;
     private Grafo grafo = new Grafo(20);
